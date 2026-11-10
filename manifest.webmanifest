@@ -1,0 +1,19 @@
+{
+  "name": "商务费比计算器",
+  "short_name": "费比计算器",
+  "description": "商务预算与费比测算工具",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f7fb",
+  "theme_color": "#173b5b",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
