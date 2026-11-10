@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>商务费比计算器｜三种ROI版</title>
+<style>
+:root{--navy:#173b5b;--blue:#147db5;--pale:#eaf4fc;--ink:#1e293b;--muted:#64748b;--line:#dce5ed;--bg:#f3f7fb;--green:#087a55;--red:#a52b25;--amber:#8a5700}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:980px;margin:24px auto;padding:0 15px 36px}
+.hero{background:linear-gradient(120deg,#173b5b,#145d88);color:#fff;padding:24px 26px;border-radius:16px 16px 0 0}
+.tag{display:inline-block;border:1px solid #ffffff66;border-radius:30px;padding:5px 10px;color:#dceefa;font-size:12px}
+h1{font-size:24px;margin:12px 0 6px}.hero p{font-size:13px;color:#d8e7f2;line-height:1.6;margin:0}
+main{background:#fff;padding:22px;border:1px solid var(--line);border-top:0;border-radius:0 0 16px 16px;box-shadow:0 12px 35px #173b5b0b}
+.tabs,.actions{display:flex;gap:9px;flex-wrap:wrap}
+button{border:1px solid #cbd5e1;background:#fff;color:#334155;padding:10px 14px;border-radius:9px;cursor:pointer;font-weight:650}
+button:hover{background:#f1f5f9}.tab.active,button.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+h2{font-size:15px;margin:22px 0 12px}
+.grid,.results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-size:13px;font-weight:700;color:#334155}
+input,.select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;color:#1e293b;background:#f8fafc;outline:none;box-shadow:inset 0 1px 2px rgba(15,23,42,.04)}
+input::placeholder{color:#94a3b8;opacity:1}
+input:focus,.select:focus{background:#fff;border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,125,181,.16)}
+input:disabled{background:#e8edf3!important;color:#94a3b8!important;border-color:#d6dee8!important;cursor:not-allowed;box-shadow:none!important;opacity:1}
+input:disabled::placeholder{color:#aab4c0!important}
+.hint,.sub,.foot{font-size:11px;color:var(--muted);line-height:1.5}
+.status{display:none;padding:11px 13px;border-radius:9px;font-size:12px;line-height:1.6;margin:13px 0}
+.status.error{display:block;background:#fff1f0;color:#991b1b;border:1px solid #fecaca}
+.status.warn{display:block;background:#fffbeb;color:var(--amber);border:1px solid #fde68a}
+.status.ok{display:block;background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
+.card{border:1px solid var(--line);border-radius:12px;padding:14px;min-width:0;background:#fff}
+.result-group{grid-column:1/-1;font-size:13px;font-weight:750;color:var(--navy);border-bottom:1px solid var(--line);padding:5px 0 7px;margin-top:3px}
+.card.primary{background:var(--pale);border-color:#c8e1f3}
+.name{font-size:12px;color:var(--muted);margin-bottom:8px}
+.value{font-size:22px;font-weight:800;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.primary .value{color:var(--blue)}.sub{margin-top:6px}
+.detail{border:1px solid var(--line);border-radius:11px;margin-top:14px;overflow:hidden}
+.detail h3{margin:0;padding:12px;background:#f8fafc;font-size:13px}
+.row{display:flex;justify-content:space-between;gap:15px;padding:11px 13px;border-top:1px solid var(--line);font-size:13px}
+.row strong{font-variant-numeric:tabular-nums}
+.formula,.note{background:#f8fafc;border:1px solid var(--line);border-radius:11px;padding:14px;margin-top:17px}
+.formula h3{font-size:13px;margin:0 0 8px}.formula p{font-size:12px;line-height:1.7;color:#475569;margin:5px 0}
+.note{font-size:12px;line-height:1.75;color:#475569}
+.actions{margin-top:17px}.hidden{display:none!important}
+.roi-defs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.roi-def{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px}
+.roi-def b{font-size:12px;display:block;margin-bottom:5px}.roi-def span{font-size:11px;color:var(--muted);line-height:1.5}
+@media(max-width:650px){.wrap{margin:0;padding:0 0 20px}.hero{border-radius:0;padding:21px 17px}main{border-radius:0;padding:17px 14px}h1{font-size:21px}.grid,.results{gap:9px}.value{font-size:19px}.tab{flex:1;font-size:12px;padding:10px 7px}.roi-defs{grid-template-columns:1fr}}
+@media print{body{background:#fff}.wrap{margin:0;max-width:none;padding:0}.hero,main{border-radius:0;box-shadow:none}.tabs,.actions{display:none}.status{display:block}}
+
+/* Premium interaction layer */
+:root{--navy:#123a5a;--blue:#117eb5;--pale:#eaf5fc;--ink:#182b3d;--muted:#63788c;--line:#dce7ef;--bg:#f2f6f9;--green:#087a55;--red:#a52b25;--amber:#8a5700}
+body{background:radial-gradient(ellipse at 12% 0%,#e5f1f8 0,transparent 34%),linear-gradient(180deg,#f4f8fb 0%,#edf3f7 100%);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1080px;margin:32px auto;padding:0 18px 44px}
+.hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#102f4b 0%,#164c70 60%,#17668d 100%);padding:30px 34px;border-radius:20px 20px 0 0;box-shadow:0 16px 36px rgba(18,58,90,.14)}
+.hero:after{content:"";position:absolute;width:330px;height:330px;border-radius:50%;right:-105px;top:-205px;background:radial-gradient(circle,#ffffff24 0,transparent 68%);pointer-events:none}
+.tag{position:relative;z-index:1;border-color:#ffffff55;background:#ffffff0b;color:#e6f3fb;padding:7px 13px;letter-spacing:.02em;backdrop-filter:blur(8px)}
+h1{position:relative;z-index:1;font-size:29px;letter-spacing:.015em;margin:15px 0 8px}.hero p{position:relative;z-index:1;font-size:13px;color:#d8e8f2;line-height:1.75;max-width:820px}
+main{background:rgba(255,255,255,.96);padding:28px 30px;border:1px solid #e1eaf0;border-top:0;border-radius:0 0 20px 20px;box-shadow:0 22px 55px rgba(18,58,90,.09)}
+h2{font-size:14px;letter-spacing:.06em;color:#244a67;margin:25px 0 13px;padding-bottom:9px;border-bottom:1px solid #e6edf2}
+.grid,.results{gap:14px}
+.field{gap:8px}label{font-size:12px;letter-spacing:.01em;color:#304a5f}
+input,.select{border:1px solid #d3e0e9;border-radius:11px;background:#f8fafc;padding:13px 14px;font-size:15px;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease,transform .18s ease}
+input:hover,.select:hover{border-color:#a9c4d7;background:#fff}
+input:focus,.select:focus{background:#fff;border-color:#318bb8;box-shadow:0 0 0 4px rgba(49,139,184,.14);transform:translateY(-1px)}
+input::placeholder{color:#9aabba}
+.hint,.sub,.foot{color:#788b9b}
+.status{border-radius:11px;padding:12px 15px;transition:opacity .2s ease,transform .2s ease}
+.card{border-color:#e0eaf1;border-radius:15px;padding:17px 18px;box-shadow:0 2px 8px rgba(18,58,90,.025);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease}
+.card:hover{transform:translateY(-2px);border-color:#bfd6e5;box-shadow:0 9px 22px rgba(18,58,90,.08)}
+.card.primary{background:linear-gradient(145deg,#edf7fd 0%,#e5f2fb 100%);border-color:#cfe6f5}
+.card.primary:hover{background:linear-gradient(145deg,#f1f9fe 0%,#e7f4fc 100%);border-color:#afd4ea}
+.name{font-size:12px;color:#667f92;margin-bottom:9px}.value{font-size:25px;letter-spacing:-.025em;color:#19334a}.primary .value{color:#0879ad}.sub{margin-top:7px}
+.result-group{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#35617e;border-bottom-color:#dfeaf1;padding:5px 0 9px;margin-top:9px}
+.detail,.formula,.note{border-color:#e0eaf1;border-radius:14px}.detail h3{background:#f6f9fb;padding:14px 16px;color:#244a67}.row{padding:12px 16px}
+.formula,.note{background:#f8fafc;padding:16px 18px}.formula h3{color:#244a67}
+button{border-color:#d1dee7;border-radius:10px;padding:11px 16px;transition:transform .15s ease,box-shadow .15s ease,background .15s ease,border-color .15s ease}
+button:hover{background:#f6f9fb;border-color:#b8cad8;box-shadow:0 4px 12px rgba(18,58,90,.08);transform:translateY(-1px)}
+button:active{transform:translateY(0) scale(.98);box-shadow:none}
+button:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(49,139,184,.18)}
+button.primary{background:linear-gradient(135deg,#173e5d,#155a7e);border-color:#173e5d;box-shadow:0 5px 12px rgba(18,58,90,.14)}
+button.primary:hover{background:linear-gradient(135deg,#1a4a6d,#176b94);box-shadow:0 7px 16px rgba(18,58,90,.2)}
+.value.value-updated{animation:valuePulse .24s ease-out}
+@keyframes valuePulse{0%{transform:translateY(2px);opacity:.6}100%{transform:translateY(0);opacity:1}}
+@media(max-width:650px){.wrap{margin:0;padding:0 0 22px}.hero{padding:24px 19px;border-radius:0}main{padding:20px 16px;border-radius:0}h1{font-size:23px}.value{font-size:21px}.card{padding:15px}.result-group{margin-top:5px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+
+/* Distinctive executive dashboard visual system */
+:root{--navy:#0c2741;--blue:#087eaa;--pale:#e6f4fa;--ink:#172c3d;--muted:#6d8191;--line:#dce7ed;--bg:#edf3f7;--green:#087a55;--red:#a52b25;--amber:#8a5700}
+body{background-color:#edf3f7;background-image:radial-gradient(ellipse at 8% 4%,rgba(41,139,174,.12),transparent 28%),radial-gradient(ellipse at 94% 27%,rgba(89,132,168,.09),transparent 23%),linear-gradient(180deg,#f2f6f8,#eaf0f4);color:var(--ink)}
+.wrap{max-width:1160px;margin:38px auto;padding:0 22px 56px}
+.hero{border-radius:24px 24px 0 0;padding:0;min-height:244px;background:linear-gradient(118deg,#0b263f 0%,#113e5a 48%,#0f6380 100%);box-shadow:0 22px 52px rgba(11,38,63,.20)}
+.hero-content{display:flex;align-items:stretch;justify-content:space-between;min-height:244px;padding:34px 42px;position:relative;z-index:1}
+.hero-copy{max-width:690px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.tag{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(198,232,244,.29);background:rgba(220,245,252,.08);border-radius:999px;padding:8px 13px;color:#d8eef5;font-size:11px;letter-spacing:.04em}
+.tag-dot{width:7px;height:7px;border-radius:50%;background:#79d7cf;box-shadow:0 0 12px #79d7cf88}.tag-divider{color:#82a9bc}
+h1{font-size:36px;line-height:1.15;letter-spacing:.01em;margin:18px 0 10px;color:#f7fbfd}.hero p{max-width:620px;font-size:13px;line-height:1.8;color:#c1d9e3}
+.hero-points{display:flex;flex-wrap:wrap;gap:9px;margin-top:19px}.hero-points span{border:1px solid rgba(211,235,244,.17);background:rgba(230,248,252,.055);border-radius:8px;padding:7px 10px;color:#d9e9ef;font-size:10px;letter-spacing:.025em}
+.hero-visual{width:260px;min-width:220px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-orbit{position:absolute;border:1px solid rgba(188,233,242,.14);border-radius:50%;transform:rotate(-24deg)}.orbit-one{width:230px;height:160px}.orbit-two{width:190px;height:126px;transform:rotate(30deg)}
+.hero-monogram{position:absolute;right:20px;top:21px;font-size:11px;font-weight:700;letter-spacing:.18em;color:#b9dce7}.hero-monogram span{color:#74d6cb;margin:0 4px}
+.hero-equation{position:relative;display:grid;grid-template-columns:auto 24px auto;align-items:center;gap:8px;padding:16px 18px;border:1px solid rgba(207,237,245,.19);background:linear-gradient(135deg,rgba(230,248,252,.12),rgba(230,248,252,.045));border-radius:15px;box-shadow:0 14px 32px rgba(3,20,32,.14);backdrop-filter:blur(10px)}
+.hero-equation b{font-size:20px;color:#f0f8fa;letter-spacing:.02em}.hero-equation i{font-style:normal;color:#73d6ce;font-size:18px;text-align:center}.hero-equation small{grid-column:1/-1;text-align:center;color:#a7c7d3;font-size:9px;letter-spacing:.12em;margin-top:3px}
+main{padding:32px 38px 30px;border-color:#e1e9ee;border-radius:0 0 24px 24px;box-shadow:0 28px 65px rgba(16,48,70,.10)}
+h2{display:flex;align-items:center;gap:11px;font-size:14px;letter-spacing:.045em;color:#244a63;margin:28px 0 14px;padding-bottom:11px;border-bottom:1px solid #e3ebef}
+.basic-grid,.target-panel{padding:20px 21px;border:1px solid #e2ebf0;border-radius:17px;background:linear-gradient(145deg,#fbfdfe,#f5f9fb);box-shadow:0 5px 16px rgba(20,59,82,.035)}
+.target-panel{background:linear-gradient(120deg,#eff8fb,#f7fafc 68%);border-color:#d6eaf0;position:relative;overflow:hidden}.target-panel:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#30a6b3,#1982aa)}
+.field{gap:9px}label{font-size:12px;font-weight:700;color:#29465b}
+input,.select{border-color:#d2e0e8;border-radius:11px;background:#fff;padding:13px 15px;font-size:15px;box-shadow:0 2px 5px rgba(17,55,78,.025)}
+input:hover,.select:hover{border-color:#9dbdce;box-shadow:0 3px 9px rgba(17,69,98,.06)}input:focus,.select:focus{border-color:#2785aa;box-shadow:0 0 0 4px rgba(39,133,170,.15),0 5px 14px rgba(17,69,98,.07);transform:translateY(-1px)}
+.hint{font-size:10.5px;color:#778b9a}.status{margin:16px 0;border-radius:12px;padding:13px 16px}
+.results{gap:13px}.result-group{display:flex;align-items:center;gap:9px;font-size:11px;font-weight:800;letter-spacing:.11em;color:#3c6077;border-bottom:1px solid #dce7ed;padding:7px 0 9px;margin-top:12px}.result-group:before{content:"";width:6px;height:6px;background:#31a5b0;border-radius:2px;transform:rotate(45deg)}
+.card{position:relative;overflow:hidden;border-color:#e1eaf0;border-radius:16px;padding:19px 20px;background:linear-gradient(155deg,#fff,#fcfdfe);box-shadow:0 4px 14px rgba(21,55,76,.035)}
+.card:after{content:"";position:absolute;inset:auto 0 0;height:2px;background:linear-gradient(90deg,transparent,#dbeaf0,transparent);opacity:.7}
+.card:hover{transform:translateY(-3px);border-color:#b6d0dc;box-shadow:0 13px 27px rgba(18,57,81,.095)}
+.card.primary{background:linear-gradient(145deg,#eaf6fb 0%,#e3f1f8 100%);border-color:#c6e2ee;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 5px 15px rgba(16,94,130,.065)}
+.card.primary:before{content:"";position:absolute;left:0;top:15px;bottom:15px;width:3px;border-radius:0 4px 4px 0;background:linear-gradient(180deg,#31a7b5,#1883b0)}
+.card.primary:after{background:linear-gradient(90deg,#b5deeb,transparent);opacity:.6}
+.card.primary:hover{background:linear-gradient(145deg,#f0f9fc,#e8f5fa);border-color:#a6d1e1;box-shadow:0 14px 28px rgba(16,94,130,.12)}
+.name{font-size:11px;letter-spacing:.015em;color:#657e90;margin-bottom:10px}.value{font-size:27px;letter-spacing:-.035em;color:#18344a}.primary .value{color:#087aa4}.sub{font-size:10.5px;color:#7a8e9e;margin-top:8px}
+.detail,.formula,.note{border-radius:16px;border-color:#e0e9ef}.detail{box-shadow:0 4px 14px rgba(21,55,76,.03)}.detail h3{padding:15px 18px;background:#f3f8fa;color:#294e66}.row{padding:13px 18px}
+.formula,.note{background:linear-gradient(145deg,#f8fbfc,#f4f8fa);padding:18px 20px}.formula h3{color:#2b5068;margin-bottom:12px}.roi-def{background:#fff;border-color:#e2ebf0;border-radius:12px}
+.actions{display:flex;align-items:center;gap:10px;margin-top:22px;padding-top:17px;border-top:1px solid #e7edf1}.actions button{min-height:42px;font-size:11px}.actions .primary{margin-left:auto}.button-arrow{display:inline-block;margin-left:7px;transition:transform .18s ease}.actions .primary:hover .button-arrow{transform:translate(2px,-2px)}
+button{border-color:#d3e0e7;background:#fff;color:#38546a;border-radius:10px}button:hover{background:#f6fafb;border-color:#adc5d2;box-shadow:0 5px 14px rgba(17,55,78,.09);transform:translateY(-2px)}button:active{transform:translateY(0) scale(.975)}button.primary{background:linear-gradient(130deg,#125476,#087f9b);border-color:#0c6686;box-shadow:0 7px 18px rgba(7,103,135,.2)}button.primary:hover{background:linear-gradient(130deg,#176987,#0b91aa);box-shadow:0 10px 23px rgba(7,103,135,.26)}
+@media(max-width:760px){.wrap{margin:0;padding:0 0 24px}.hero{border-radius:0}.hero-content{min-height:0;padding:27px 21px}.hero-visual{width:140px;min-width:135px}.hero-equation{gap:5px;padding:12px}.hero-equation b{font-size:15px}.hero-orbit.orbit-one{width:140px}.hero-orbit.orbit-two{width:120px}h1{font-size:28px}.hero-points{gap:6px}.hero-points span{font-size:9px;padding:6px 8px}main{padding:22px 17px;border-radius:0}.basic-grid,.target-panel{padding:15px}.card{padding:16px}.value{font-size:23px}.actions .primary{margin-left:0}}
+@media(max-width:520px){.hero-visual{display:none}.hero-content{padding:25px 18px}main{padding:19px 14px}.basic-grid,.target-panel{padding:14px}.actions{display:grid;grid-template-columns:1fr 1fr}.actions .primary{grid-column:1/-1;grid-row:1}.result-group{margin-top:8px}}
+
+
+/* Motion and finish pass — visual-only; preserves all layout rules */
+.hero{background-size:170% 170%;animation:heroDrift 16s ease-in-out infinite alternate}
+.hero:before{content:"";position:absolute;inset:-20% auto -20% -42%;width:36%;background:linear-gradient(105deg,transparent,rgba(202,241,248,.075),transparent);transform:skewX(-16deg);animation:heroSweep 9s ease-in-out infinite;pointer-events:none}
+.tag-dot{animation:dotBreathe 2.8s ease-in-out infinite}
+main{animation:surfaceArrive .62s cubic-bezier(.2,.7,.25,1) both}
+.hero-copy{animation:copyArrive .65s cubic-bezier(.2,.7,.25,1) both}
+.hero-visual{animation:visualArrive .8s cubic-bezier(.2,.7,.25,1) .08s both}
+.basic-grid .field,.target-panel .field{animation:fieldArrive .42s cubic-bezier(.2,.7,.25,1) both}
+.basic-grid .field:nth-child(2),.target-panel .field:nth-child(2){animation-delay:.06s}
+.basic-grid .field:nth-child(3){animation-delay:.12s}.basic-grid .field:nth-child(4){animation-delay:.18s}
+.card{transition:transform .24s cubic-bezier(.2,.75,.25,1),border-color .22s ease,box-shadow .24s ease,background .22s ease}
+.card:hover{transform:translateY(-3px) scale(1.008);box-shadow:0 15px 30px rgba(18,57,81,.11)}
+.card.primary{box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 6px 18px rgba(16,94,130,.075)}
+.card.primary:hover{box-shadow:inset 0 1px 0 rgba(255,255,255,.96),0 16px 32px rgba(16,94,130,.15)}
+.value.value-updated{animation:valueLift .32s cubic-bezier(.2,.75,.25,1)}
+input,.select{transition:border-color .2s ease,box-shadow .22s ease,background .2s ease,transform .2s cubic-bezier(.2,.75,.25,1)}
+input:focus,.select:focus{box-shadow:0 0 0 4px rgba(49,139,184,.13),0 5px 14px rgba(17,69,98,.055)}
+button{position:relative;overflow:hidden;transition:transform .17s cubic-bezier(.2,.75,.25,1),box-shadow .2s ease,background .2s ease,border-color .2s ease}
+button:before{content:"";position:absolute;inset:-40% auto -40% -55%;width:32%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.24),transparent);transform:skewX(-18deg);transition:left .45s ease;pointer-events:none}
+button:hover:before{left:125%}
+button.primary:active{box-shadow:0 2px 6px rgba(7,103,135,.15)}
+.status{animation:statusArrive .28s ease both}
+.result-group{transition:color .2s ease,border-color .2s ease}.result-group:hover{color:#147b9d;border-bottom-color:#b9d9e5}
+@keyframes heroDrift{0%{background-position:0% 40%}100%{background-position:100% 60%}}
+@keyframes heroSweep{0%,16%{left:-42%;opacity:0}30%{opacity:1}60%,100%{left:115%;opacity:0}}
+@keyframes dotBreathe{0%,100%{box-shadow:0 0 0 0 rgba(121,215,207,.32)}50%{box-shadow:0 0 0 5px rgba(121,215,207,0)}}
+@keyframes surfaceArrive{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes copyArrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes visualArrive{from{opacity:0;transform:translateX(9px) scale(.98)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes fieldArrive{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes statusArrive{from{opacity:.35;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+@keyframes valueLift{0%{transform:translateY(4px);opacity:.55}65%{transform:translateY(-1px);opacity:1}100%{transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.hero,.hero:before,.tag-dot,main,.hero-copy,.hero-visual,.basic-grid .field,.target-panel .field,.status,.value.value-updated{animation:none!important}*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+/* Luminous visual pass — styling and motion only */
+body{background-image:radial-gradient(ellipse at 8% 4%,rgba(38,178,196,.17),transparent 28%),radial-gradient(ellipse at 95% 24%,rgba(89,119,214,.13),transparent 25%),radial-gradient(ellipse at 54% 100%,rgba(73,160,187,.09),transparent 33%),linear-gradient(180deg,#f3f8fb,#e9f0f5)}
+.hero{background-image:radial-gradient(ellipse at 88% 24%,rgba(70,211,210,.20),transparent 27%),radial-gradient(ellipse at 58% 118%,rgba(57,130,225,.22),transparent 41%),linear-gradient(118deg,#081d34 0%,#103b59 48%,#0d6078 100%);background-size:150% 150%;animation:heroAurora 18s ease-in-out infinite alternate}
+.hero:before{width:42%;background:linear-gradient(105deg,transparent,rgba(107,234,224,.18),rgba(153,217,255,.10),transparent);animation:heroLaser 7.5s cubic-bezier(.55,.05,.35,.95) infinite}
+.hero:after{animation:heroHalo 8s ease-in-out infinite alternate}
+.hero-orbit{border-color:rgba(129,238,230,.24);box-shadow:0 0 22px rgba(54,209,202,.06);animation:orbitFloat 14s ease-in-out infinite alternate}
+.orbit-two{animation:orbitFloatTwo 17s ease-in-out infinite alternate}
+.hero-equation{border-color:rgba(143,234,231,.34);background:linear-gradient(135deg,rgba(73,200,207,.20),rgba(120,157,238,.11) 55%,rgba(230,248,252,.07));box-shadow:0 0 0 1px rgba(75,209,206,.06),0 16px 38px rgba(2,21,38,.25),inset 0 1px 0 rgba(255,255,255,.12);animation:equationGlow 4.8s ease-in-out infinite}
+.hero-equation i{color:#75f0da;text-shadow:0 0 14px rgba(91,245,221,.55)}
+.tag{border-color:rgba(134,231,226,.37);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 22px rgba(54,204,195,.08)}
+.tag-dot{background:#7cf2dd;box-shadow:0 0 12px rgba(124,242,221,.68)}
+.card.primary{animation:cardAura 6s ease-in-out infinite}
+.card.primary:hover{transform:translateY(-4px) scale(1.012);box-shadow:0 0 0 1px rgba(32,155,183,.16),0 18px 38px rgba(16,116,154,.19),0 0 27px rgba(62,195,197,.12)}
+.primary .value{color:#087aa4;background:linear-gradient(100deg,#087aa4 0%,#159bc1 43%,#347bd0 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.result-group:before{background:linear-gradient(145deg,#38c8ba,#238fd0);box-shadow:0 0 12px rgba(39,183,183,.42)}
+input:focus,.select:focus{border-color:#27a0bb;box-shadow:0 0 0 4px rgba(39,160,187,.13),0 0 22px rgba(41,173,193,.13),0 6px 15px rgba(17,69,98,.07)}
+button.primary{background:linear-gradient(112deg,#0d587b,#087f9b,#236ca7,#0d587b);background-size:240% 100%;animation:buttonFlow 8s ease-in-out infinite;box-shadow:0 7px 20px rgba(7,103,135,.22),inset 0 1px 0 rgba(255,255,255,.15)}
+button.primary:hover{background-position:100% 0;box-shadow:0 0 0 1px rgba(49,174,193,.20),0 11px 27px rgba(7,103,135,.30),0 0 24px rgba(43,170,189,.15)}
+button:focus-visible{box-shadow:0 0 0 4px rgba(41,160,187,.20),0 0 20px rgba(41,160,187,.12)}
+.target-panel{box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 8px 22px rgba(16,94,130,.06)}
+.target-panel:before{background:linear-gradient(180deg,#42d2c4,#238cbb,#758bea);background-size:100% 180%;animation:accentFlow 5s ease infinite}
+::selection{background:rgba(58,174,192,.22);color:#102f4b}
+@keyframes heroAurora{0%{background-position:0% 30%}100%{background-position:100% 70%}}
+@keyframes heroLaser{0%,18%{left:-48%;opacity:0}32%{opacity:1}70%,100%{left:130%;opacity:0}}
+@keyframes heroHalo{0%{transform:scale(.96);opacity:.72}100%{transform:scale(1.08);opacity:1}}
+@keyframes orbitFloat{0%{transform:rotate(-24deg) scale(.98)}100%{transform:rotate(-14deg) scale(1.04)}}
+@keyframes orbitFloatTwo{0%{transform:rotate(30deg) scale(1.02)}100%{transform:rotate(20deg) scale(.96)}}
+@keyframes equationGlow{0%,100%{box-shadow:0 0 0 1px rgba(75,209,206,.05),0 16px 38px rgba(2,21,38,.22),inset 0 1px 0 rgba(255,255,255,.11)}50%{box-shadow:0 0 0 1px rgba(75,209,206,.14),0 18px 42px rgba(2,21,38,.25),0 0 24px rgba(58,200,200,.12),inset 0 1px 0 rgba(255,255,255,.15)}}
+@keyframes cardAura{0%,100%{box-shadow:inset 0 1px 0 rgba(255,255,255,.92),0 6px 18px rgba(16,94,130,.06)}50%{box-shadow:inset 0 1px 0 rgba(255,255,255,.96),0 8px 22px rgba(16,94,130,.10)}}
+@keyframes buttonFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes accentFlow{0%,100%{background-position:0% 0%}50%{background-position:0% 100%}}
+@media(prefers-reduced-motion:reduce){.hero,.hero:before,.hero:after,.hero-orbit,.hero-equation,.card.primary,.target-panel:before,button.primary{animation:none!important}}
+
+</style>
+
+<meta name="theme-color" content="#173b5b">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="1024x1024" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div class="hero-content">
+    <div class="hero-copy">
+      <span class="tag"><span class="tag-dot"></span>商务预算测算工具 <span class="tag-divider">/</span> 4 种计算口径</span>
+      <h1>商务费比计算器</h1>
+      <p>把投流、达人成本与退款影响放进同一套预算模型。GMV 为退款前成交金额，GSV 为退款后结算金额。</p>
+      <div class="hero-points"><span>实时联动计算</span><span>GMV 与 GSV 双口径</span><span>一键导出结果</span></div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div>
+      <div class="hero-monogram">B<span>/</span>R</div>
+      <div class="hero-equation"><b>GMV</b><i>→</i><b>GSV</b><small>预算 · 成本 · 结算</small></div>
+    </div>
+  </div>
+</header>
+<main>
+  <h2>01 / 基础参数</h2>
+  <div class="grid basic-grid">
+    <div class="field">
+      <label for="payRoi">支付 ROI（支付 GMV ÷ 千川消耗）</label>
+      <input id="payRoi" type="number" min="0" step="0.01" value="" placeholder="请输入支付 ROI">
+      <span class="hint">广告投放口径；用于反推千川消耗</span>
+    </div>
+    <div class="field">
+      <label for="booth">达人坑位费（元）</label>
+      <input id="booth" type="number" min="0" step="0.01" value="" placeholder="请输入达人坑位费">
+    </div>
+    <div class="field">
+      <label for="rate">达人佣金比例（%）</label>
+      <input id="rate" type="number" min="0" max="100" step="0.01" value="" placeholder="请输入达人佣金比例">
+      <span class="hint">佣金比例按百分数输入，例如输入 20 代表 20%；佣金按 GSV × 佣金比例估算</span>
+    </div>
+    <div class="field">
+      <label for="ret">退货率（%）</label>
+      <input id="ret" type="number" min="0" max="99.99" step="0.01" value="" placeholder="请输入退货率，可留空">
+      <span class="hint">百分比按百分数输入，例如输入 20 代表 20%；GSV = GMV ×（1 − 退货率）</span>
+    </div>
+  </div>
+
+  <h2>02 / 目标参数</h2>
+  <div class="grid target-panel">
+    <div class="field">
+      <label for="targetType">目标类型</label>
+      <select id="targetType" class="select">
+        <option value="fee_gmv">按目标综合费比反推（GMV口径）</option>
+        <option value="fee_gsv">按结算综合费比反推（GSV口径）</option>
+        <option value="gmv">按目标 GMV 测算</option>
+        <option value="gsv">按目标 GSV 测算</option>
+      </select>
+      <span class="hint">选择一种目标口径，结果区会自动计算其余参数</span>
+    </div>
+    <div class="field">
+      <label id="targetValueLabel" for="targetValue">目标费比（%）</label>
+      <input id="targetValue" type="number" min="0" step="0.01" value="" placeholder="请输入目标费比">
+      <span class="hint" id="targetHint">百分比按百分数输入，例如输入 60 代表 60%</span>
+    </div>
+  </div>
+
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+  <h2>03 / 自动计算结果</h2>
+  <div class="results">
+
+<div class="result-group">成交金额</div>
+<div class="card primary" id="gmvCard">
+      <div class="name">GMV（退款前支付成交金额）</div><div class="value" id="oGmv">—</div><div class="sub">支付 GMV 口径</div>
+    </div>
+<div class="card primary" id="gsvCard">
+      <div class="name">GSV（退款后结算成交金额）</div><div class="value" id="oGsv">—</div><div class="sub">GMV ×（1 − 退货率）</div>
+    </div>
+<div class="result-group">费用金额</div>
+<div class="card primary">
+      <div class="name">达人总收益（坑位费 + GSV口径佣金）</div><div class="value" id="oTalentIncome">—</div><div class="sub">达人坑位费 + GSV口径佣金</div>
+    </div>
+<div class="card">
+      <div class="name">达人佣金金额（GSV口径预算估算）</div><div class="value" id="oComm">—</div><div class="sub">GSV × 佣金比例</div>
+    </div>
+<div class="card">
+      <div class="name">千川广告消耗</div><div class="value" id="oAds">—</div><div class="sub">GMV ÷ 支付 ROI</div>
+    </div>
+<div class="card">
+      <div class="name">总营销费用</div><div class="value" id="oTotal">—</div><div class="sub">坑位费 + 达人佣金 + 千川消耗</div>
+    </div>
+<div class="result-group">费比</div>
+<div class="card primary">
+      <div class="name">综合费比（GMV口径）</div><div class="value" id="oFee">—</div><div class="sub">总营销费用 ÷ 支付 GMV</div>
+    </div>
+<div class="card primary">
+      <div class="name">结算综合费比（GSV口径）</div><div class="value" id="oSettleFee">—</div><div class="sub">总营销费用 ÷ 结算 GMV（GSV）</div>
+    </div>
+<div class="card">
+      <div class="name">广告费比（投流费比）</div><div class="value" id="oAdFee">—</div><div class="sub">千川消耗 ÷ 支付 GMV，不含佣金和坑位费</div>
+    </div>
+<div class="card">
+      <div class="name">达人费比（佣金 + 坑位费）</div><div class="value" id="oTalentFee">—</div><div class="sub">（坑位费 + 达人佣金）÷ 支付 GMV，不含投流</div>
+    </div>
+<div class="result-group">ROI</div>
+<div class="card primary">
+      <div class="name">支付 ROI（广告 ROI）</div><div class="value" id="oPayRoi">—</div><div class="sub">支付 GMV ÷ 千川消耗</div>
+    </div>
+<div class="card primary" id="netRoiCard">
+      <div class="name">净成交 ROI（结算 ROI / GSV ROI）</div><div class="value" id="oNetRoi">—</div><div class="sub">GSV ÷ 千川消耗</div>
+    </div>
+<div class="card primary">
+      <div class="name">全成本 ROI（综合 ROI）</div><div class="value" id="oFullRoi">—</div><div class="sub">GMV ÷ 总营销费用</div>
+    </div>
+  </div>
+  <div class="detail">
+    <h3>04 / 营销费用明细</h3>
+    <div class="row"><span>达人坑位费</span><strong id="dBooth">—</strong></div>
+    <div class="row"><span>达人佣金</span><strong id="dComm">—</strong></div>
+    <div class="row"><span>达人总收益（坑位费 + 佣金）</span><strong id="dTalentIncome">—</strong></div>
+    <div class="row"><span>千川广告消耗</span><strong id="dAds">—</strong></div>
+    <div class="row"><span>总营销费用</span><strong id="dTotal">—</strong></div>
+  </div>
+
+  <div class="actions">
+    <button id="reset" type="button">恢复示例数据</button>
+    <button id="clear" type="button">清空输入</button>
+    <button class="primary" id="csv" type="button">导出计算结果 CSV <span class="button-arrow">↗</span></button>
+    <button id="print" type="button">打印 / 保存 PDF</button>
+  </div>
+
+  <div class="formula">
+    <h3>05 / 计算口径与公式</h3>
+    <div class="roi-defs">
+      <div class="roi-def"><b>支付 ROI（广告 ROI）</b><span>支付 GMV ÷ 千川广告消耗<br>只衡量广告投放产出，不扣退款及达人费用</span></div>
+      <div class="roi-def"><b>净成交 ROI（结算 ROI）</b><span>GSV（扣退款）÷ 千川广告消耗<br>衡量扣退款后的广告产出</span></div>
+      <div class="roi-def"><b>全成本 ROI（综合 ROI）</b><span>GMV ÷（千川消耗 + 坑位费 + 达人佣金）<br>衡量达人专场全营销成本效率</span></div>
+    </div>
+    <p><b>四种费比自动计算：</b>广告费比 = 千川消耗 ÷ 支付 GMV；达人费比 =（坑位费 + 达人佣金）÷ 支付 GMV；综合费比（GMV口径）= 总营销费用 ÷ 支付 GMV；结算综合费比（GSV口径）= 总营销费用 ÷ 退款后结算 GMV（GSV）。</p>
+    <p><b>综合费比（GMV口径）</b> = 总营销费用 ÷ GMV；<b>全成本 ROI</b> = GMV ÷ 总营销费用。两者互为倒数。退款率越高，结算综合费比通常越高。</p>
+    <p><b>净成交 ROI</b> = 支付 ROI ×（1 − 退货率）。净成交 ROI 与支付 ROI 的差异来自退款。</p>
+    <p id="formulaDescription"></p>
+  </div>
+
+  <div class="note">
+    <b>重要口径说明：</b><br>
+    1. 支付 ROI = 支付 GMV ÷ 千川消耗；净成交 ROI = 退款后 GSV ÷ 千川消耗；全成本 ROI = GMV ÷（千川消耗 + 坑位费 + 达人佣金）。<br>
+    2. 模式一按目标费比口径反推：输入 GMV口径目标综合费比时，修改退货率会重新反推 GMV，以维持目标费比，并影响 GSV、GSV口径佣金、千川消耗和总营销费用；输入 GSV口径结算综合费比时，修改退货率会重新反推 GMV，以维持目标结算费比，同样会影响 GSV、佣金、千川消耗和总营销费用。<br>
+    3. 模式二固定输入 GSV 时，修改退货率会反推改变 GMV，并影响按 GSV 估算的佣金、千川消耗和总营销费用；固定输入 GMV 时，GMV不变，GSV、佣金、千川消耗和总营销费用会随退货率变化。<br>
+    4. 退货率留空时，其他预算暂按 0% 退货率估算；模式一隐藏 GSV 和净成交 ROI，模式二隐藏 GMV 和净成交 ROI。<br>
+    5. 佣金暂按 GSV × 合同佣金比例估算；实际佣金结算基数、退款佣金追回及结算周期，以平台实际账单为准。本工具是品牌方预算测算模型，不代表抖音官方结算公式。
+  </div>
+  <p class="foot">单机 HTML 文件，无需安装、无需联网。下载后使用 Chrome 或 Edge 打开即可。</p>
+</main>
+</div>
+
+<script>
+(() => {
+  let lastResult = null;
+  let lastTargetKind = null;
+  const $ = id => document.getElementById(id);
+  const raw = id => $(id).value.trim();
+  const num = id => Number(raw(id));
+  const money = x => Number.isFinite(x) ? "¥" + Math.round(x).toLocaleString("zh-CN") : "—";
+  const pct = x => Number.isFinite(x) ? (x * 100).toFixed(2) + "%" : "—";
+  const set = (id, value) => {
+    const el = $(id);
+    if (el.textContent !== value) {
+      el.textContent = value;
+      if (el.classList.contains("value")) {
+        el.classList.remove("value-updated");
+        void el.offsetWidth;
+        el.classList.add("value-updated");
+      }
+    }
+  };
+  const hide = (id, value) => $(id).classList.toggle("hidden", value);
+
+  function showStatus(type, message) {
+    $("status").className = "status" + (type ? " " + type : "");
+    $("status").textContent = message || "";
+  }
+
+  function updateTargetDescription() {
+    const descriptions = {
+      fee_gmv: ["目标综合费比（GMV口径，%）", "请输入目标综合费比", "百分比按百分数输入，例如输入 60 代表 60%", "GMV = 坑位费 ÷（目标综合费比 − 佣金比例 ×（1 − 退货率）− 1 ÷ 支付 ROI）"],
+      fee_gsv: ["结算综合费比（GSV口径，%）", "请输入结算综合费比", "百分比按百分数输入，例如输入 60 代表 60%", "GMV = 坑位费 ÷［（结算综合费比 − 佣金比例）×（1 − 退货率）− 1 ÷ 支付 ROI］"],
+      gmv: ["目标 GMV（元）", "请输入退款前 GMV", "输入退款前成交金额，系统按退货率计算 GSV", "GSV = GMV ×（1 − 退货率）"],
+      gsv: ["目标 GSV（元）", "请输入退款后 GSV", "输入退款后结算金额，系统按退货率反推 GMV", "GMV = GSV ÷（1 − 退货率）"]
+    };
+    const item = descriptions[$("targetType").value];
+    $("targetValueLabel").textContent = item[0];
+    $("targetValue").placeholder = item[1];
+    $("targetHint").textContent = item[2];
+    $("formulaDescription").innerHTML = "<b>当前计算公式：</b>" + item[3] + "<br>达人佣金 = GSV × 佣金比例；千川消耗 = GMV ÷ 支付 ROI；总营销费用 = 坑位费 + 达人佣金 + 千川消耗。";
+    calculate();
+  }
+
+  function clearOutputs() {
+    ["oGmv","oGsv","oComm","oTalentIncome","oAds","oTotal","oFee","oAdFee","oTalentFee","oSettleFee","oPayRoi","oNetRoi","oFullRoi",
+     "dBooth","dComm","dTalentIncome","dAds","dTotal"].forEach(id => set(id, "—"));
+    hide("gmvCard", false); hide("gsvCard", false); hide("netRoiCard", false);
+  }
+
+  function calculate() {
+    clearOutputs(); showStatus("", ""); lastResult = null;
+    const roiText=raw("payRoi"), boothText=raw("booth"), rateText=raw("rate"), targetText=raw("targetValue"), returnText=raw("ret");
+    const payRoiInput=num("payRoi"), booth=num("booth"), rate=num("rate")/100;
+    const returnBlank=returnText==="", returnRate=returnBlank?0:Number(returnText)/100, type=$("targetType").value;
+    const isFeeTarget=type==="fee_gmv" || type==="fee_gsv";
+    const targetBasis=$("targetType").selectedOptions[0].textContent;
+
+    if (!roiText || !boothText || !rateText || !targetText) {
+      showStatus("error", "请填写支付 ROI、达人坑位费、佣金比例和所选目标值。"); return;
+    }
+    if (!Number.isFinite(payRoiInput)||payRoiInput<=0||!Number.isFinite(booth)||booth<0||!Number.isFinite(rate)||rate<0||rate>1) {
+      showStatus("error", "输入无效：支付 ROI 必须大于 0；坑位费不能为负数；佣金比例须在 0% 至 100% 之间。"); return;
+    }
+    if (!returnBlank&&(!Number.isFinite(returnRate)||returnRate<0||returnRate>=1)) {
+      showStatus("error", "退货率须在 0%（含）至 100%（不含）之间，或留空。"); return;
+    }
+    const targetValue=num("targetValue");
+    if (!Number.isFinite(targetValue)||targetValue<=0) {
+      showStatus("error", isFeeTarget?"目标费比必须大于 0。":"目标成交金额必须大于 0。"); return;
+    }
+
+    let gmv,gsv;
+    if (type==="fee_gmv") {
+      if (booth<=0) { showStatus("error", "按费比反推需要大于 0 的坑位费，才能反推出正数 GMV。"); return; }
+      const d=targetValue/100-rate*(1-returnRate)-1/payRoiInput;
+      if (d<=0) { showStatus("error", "目标综合费比须大于 GSV口径佣金率 ×（1 − 退货率）+ 1/支付 ROI，才能反推出正数 GMV。"); return; }
+      gmv=booth/d; gsv=gmv*(1-returnRate);
+    } else if (type==="fee_gsv") {
+      if (booth<=0) { showStatus("error", "按费比反推需要大于 0 的坑位费，才能反推出正数 GMV。"); return; }
+      const d=(targetValue/100-rate)*(1-returnRate)-1/payRoiInput;
+      if (d<=0) { showStatus("error", "结算综合费比须满足（目标费比 − 佣金比例）×（1 − 退货率）> 1/支付 ROI，才能反推出正数 GMV。"); return; }
+      gmv=booth/d; gsv=gmv*(1-returnRate);
+    } else if (type==="gmv") {
+      gmv=targetValue; gsv=gmv*(1-returnRate);
+    } else {
+      gsv=targetValue; gmv=gsv/(1-returnRate);
+    }
+
+    const commission=gsv*rate, talentIncome=booth+commission, adSpend=gmv/payRoiInput, total=talentIncome+adSpend;
+    const feeRatio=total/gmv, adFeeRatio=adSpend/gmv, talentFeeRatio=talentIncome/gmv, settlementFeeRatio=total/gsv;
+    const paymentRoi=gmv/adSpend, netRoi=gsv/adSpend, fullCostRoi=gmv/total;
+    set("oGmv",money(gmv)); set("oGsv",returnBlank&&type!=="gsv"?"按 0% 假设隐藏":money(gsv));
+    set("oComm",money(commission)); set("oTalentIncome",money(talentIncome)); set("oAds",money(adSpend)); set("oTotal",money(total));
+    set("oFee",pct(feeRatio)); set("oAdFee",pct(adFeeRatio)); set("oTalentFee",pct(talentFeeRatio)); set("oSettleFee",pct(settlementFeeRatio));
+    set("oPayRoi",paymentRoi.toFixed(2)); set("oNetRoi",returnBlank?"按 0% 假设隐藏":netRoi.toFixed(2)); set("oFullRoi",fullCostRoi.toFixed(2));
+    set("dBooth",money(booth)); set("dComm",money(commission)); set("dTalentIncome",money(talentIncome)); set("dAds",money(adSpend)); set("dTotal",money(total));
+
+    hide("gmvCard",returnBlank&&type==="gsv"); hide("gsvCard",returnBlank&&type!=="gsv"); hide("netRoiCard",returnBlank);
+    if (returnBlank) {
+      const msg=type==="gsv"?"固定目标 GSV，退货率暂按 0% 估算；已隐藏反推 GMV 和净成交 ROI。":
+        type==="gmv"?"固定目标 GMV，退货率暂按 0% 估算；已隐藏 GSV 和净成交 ROI。":
+        type==="fee_gsv"?"退货率暂按 0% 估算并固定结算综合费比；已隐藏 GSV 和净成交 ROI。":"退货率暂按 0% 估算并固定目标综合费比；已隐藏 GSV 和净成交 ROI。";
+      showStatus("warn",msg);
+    } else if (type==="fee_gmv") {
+      showStatus("ok","固定 GMV口径目标综合费比：修改退货率会重新反推 GMV，以维持目标费比；GSV、佣金及费用随之变化。");
+    } else if (type==="fee_gsv") {
+      showStatus("ok","固定 GSV口径结算综合费比：修改退货率会重新反推 GMV，以维持目标结算费比；GSV、佣金及费用随之变化。");
+    } else if (type==="gsv") {
+      showStatus("ok","固定目标 GSV：修改退货率会反推 GMV，并影响佣金、千川消耗和总营销费用。");
+    } else {
+      showStatus("ok","固定目标 GMV：修改退货率会改变 GSV、佣金、千川消耗和总营销费用。");
+    }
+
+    const modeLabel=isFeeTarget?"按目标费比反推":"按目标成交额测算";
+    lastResult={mode:modeLabel,targetBasis,paymentROI:paymentRoi,booth,commissionRate:rate*100,returnRate:returnBlank?"未填写（按0%临时估算）":returnRate*100,
+      gmv:returnBlank&&type==="gsv"?"按要求隐藏":gmv,gsv:returnBlank&&type!=="gsv"?"按要求隐藏":gsv,
+      commission,talentIncome,adSpend,total,feeRatio:feeRatio*100,adFeeRatio:adFeeRatio*100,talentFeeRatio:talentFeeRatio*100,settlementFeeRatio:settlementFeeRatio*100,
+      paymentRoiOut:paymentRoi,netRoi:returnBlank?"按要求隐藏":netRoi,fullCostRoi};
+  }
+
+  ["payRoi","booth","rate","ret","targetValue"].forEach(id=>$(id).addEventListener("input",calculate));
+  $("targetType").addEventListener("change",()=>{
+    const nextKind=$("targetType").value.startsWith("fee_")?"fee":"amount";
+    const unitChanged=lastTargetKind!==null&&lastTargetKind!==nextKind;
+    if(unitChanged) $("targetValue").value="";
+    lastTargetKind=nextKind;
+    updateTargetDescription();
+    if(unitChanged) {
+      $("targetHint").textContent += " 已切换单位，请重新输入目标值。";
+      showStatus("warn","目标单位已切换，已清空旧数值，请重新输入。");
+      $("targetValue").focus();
+    }
+  });
+  $("reset").addEventListener("click",()=>{
+    $("payRoi").value="3"; $("booth").value="50000"; $("rate").value="5"; $("ret").value="20";
+    $("targetType").value="fee_gmv"; $("targetValue").value="60"; lastTargetKind="fee"; updateTargetDescription();
+    flashButton("reset","已恢复示例");
+  });
+  $("clear").addEventListener("click",()=>{
+    ["payRoi","booth","rate","ret","targetValue"].forEach(id=>$(id).value=""); calculate();
+    flashButton("clear","已清空");
+  });
+  function flashButton(id,label) {
+    const button=$(id), original=button.dataset.originalLabel||button.textContent;
+    button.dataset.originalLabel=original; button.textContent=label;
+    window.setTimeout(()=>{button.textContent=original;},1100);
+  }
+  $("print").addEventListener("click",()=>window.print());
+  $("csv").addEventListener("click",()=>{
+    calculate(); if(!lastResult)return;
+    const rows=[["项目","结果"],["计算模式",lastResult.mode],["目标输入口径",lastResult.targetBasis],["目标值",raw("targetValue")],["支付 ROI（支付GMV/千川消耗）",lastResult.paymentROI],
+      ["达人坑位费（元）",lastResult.booth],["达人佣金比例（%）",lastResult.commissionRate],["退货率（%）",lastResult.returnRate],
+      ["GMV（退款前）",lastResult.gmv],["GSV（退款后）",lastResult.gsv],["达人佣金（GSV口径，元）",lastResult.commission],["达人总收益（坑位费+GSV口径佣金，元）",lastResult.talentIncome],
+      ["千川广告消耗（元）",lastResult.adSpend],["总营销费用（元）",lastResult.total],["广告费比（%）",lastResult.adFeeRatio],["达人费比（%）",lastResult.talentFeeRatio],
+      ["综合费比（GMV口径，%）",lastResult.feeRatio],["结算综合费比（GSV口径，%）",lastResult.settlementFeeRatio],["支付 ROI",lastResult.paymentRoiOut],["净成交 ROI",lastResult.netRoi],["全成本 ROI",lastResult.fullCostRoi]];
+    const csv="\uFEFF"+rows.map(row=>row.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(",")).join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url; a.download="商务费比计算结果.csv"; a.click(); URL.revokeObjectURL(url);
+  });
+  lastTargetKind=$("targetType").value.startsWith("fee_")?"fee":"amount";
+  updateTargetDescription();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
+</body>
+</html>
