@@ -1,0 +1,7 @@
+{
+  "name": "商务费比与ROI智能测算平台",
+  "description": "电商直播与达人商务全链路预算、费比与三种ROI测算决策工具",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
