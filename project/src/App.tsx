@@ -628,7 +628,7 @@ export default function App() {
 
   const handleDownloadZip = () => {
     const a = document.createElement('a');
-    a.href = './商务费比计算器_完整项目包.zip';
+    a.href = 'https://github.com/xucy217429-ops/shangwufeibi-calculator/archive/refs/heads/main.zip';
     a.download = '商务费比计算器_完整项目包.zip';
     document.body.appendChild(a);
     a.click();
