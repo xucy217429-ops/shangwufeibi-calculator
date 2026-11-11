@@ -1,0 +1,53 @@
+name: Publish calculator pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: project/package-lock.json
+      - name: Install dependencies
+        working-directory: project
+        run: npm ci --legacy-peer-deps
+      - name: Build platform
+        working-directory: project
+        run: npm run build -- --base=/shangwufeibi-calculator/roi-platform/
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Assemble site
+        run: |
+          mkdir -p _site/roi-platform
+          cp index.html manifest.webmanifest sw.js icon.png _site/
+          cp -R project/dist/. _site/roi-platform/
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
